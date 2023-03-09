@@ -17,6 +17,7 @@ from .protocol import (
     AngleMessage,
     MagneticMessage,
     QuaternionMessage,
+    LatLonMessage,
     CalibrationMode,
     InstallationDirection,
 )
@@ -84,6 +85,12 @@ class IMU:
         self.last_yaw = None
         self.last_mag = None
         self.last_q = None
+        self.last_lat_d = None
+        self.last_lat_m = None
+        self.last_lon_d = None
+        self.last_lon_m = None
+        self.last_lat = None
+        self.last_lon = None
 
     def close(self) -> None:
         """
@@ -134,6 +141,13 @@ class IMU:
             self.last_temp_celsius = msg.temp_celsius
         elif isinstance(msg, QuaternionMessage):
             self.last_q = msg.q
+        elif isinstance(msg, LatLonMessage):
+            self.last_lat_d = msg.lat_d
+            self.last_lat_m = msg.lat_m
+            self.last_lon_d = msg.lon_d
+            self.last_lon_m = msg.lon_m
+            self.last_lat = msg.lat
+            self.last_lon = msg.lon
 
     def _rxloop(self) -> None:
         message_cls = None
@@ -226,6 +240,9 @@ class IMU:
         messages have been received, will return `None`.
         """
         return self.last_q
+    
+    def get_latlon(self) -> Optional[Tuple[float, float, float, float, float, float, float]]:
+        return self.last_lat_d,  self.last_lat_m, self.last_lon_d, self.last_lon_m, self.last_lat, self.last_lon
 
     def save_configuration(self) -> None:
         """
