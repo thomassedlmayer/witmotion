@@ -20,6 +20,7 @@ from .protocol import (
     LatLonMessage,
     CalibrationMode,
     InstallationDirection,
+    PressureMessage,
 )
 
 log = logging.getLogger(__name__)
@@ -91,6 +92,8 @@ class IMU:
         self.last_lon_m = None
         self.last_lat = None
         self.last_lon = None
+        self.pressure_pa = None
+        self.height_cm = None
 
     def close(self) -> None:
         """
@@ -148,6 +151,9 @@ class IMU:
             self.last_lon_m = msg.lon_m
             self.last_lat = msg.lat
             self.last_lon = msg.lon
+        elif isinstance(msg, PressureMessage):
+            self.pressure_pa = msg.pressure_pa
+            self.height_cm = msg.height_cm
 
     def _rxloop(self) -> None:
         message_cls = None
@@ -243,6 +249,9 @@ class IMU:
     
     def get_latlon(self) -> Optional[Tuple[float, float, float, float, float, float, float]]:
         return self.last_lat_d,  self.last_lat_m, self.last_lon_d, self.last_lon_m, self.last_lat, self.last_lon
+
+    def get_pressure(self) -> Optional[Tuple[float, float]]:
+        return self.pressure_pa, self.height_cm
 
     def save_configuration(self) -> None:
         """
